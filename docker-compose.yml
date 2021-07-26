@@ -1,0 +1,48 @@
+# docker-compose.yml
+version: '3.7'
+services:
+  db:
+    image: mysql:5.7.29
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wp_database
+      MYSQL_USER: wp_username
+      MYSQL_PASSWORD: wp_password
+
+  wordpress:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - '8000:80'
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp_username
+      WORDPRESS_DB_PASSWORD: wp_password
+      WORDPRESS_DB_NAME: wp_database
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_DEBUG: 1
+    volumes:
+      - ./wp_content:/var/www/html/wp-content
+
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin:4.9.4
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: db
+    restart: always
+    ports:
+      - '8080:80'
+
+volumes:
+  db:
+  wp_content:
+  wordpress_data: {}
